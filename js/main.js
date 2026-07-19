@@ -128,23 +128,29 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 })();
 
 // ─── Contact form ─────────────────────────────────────────────
+// Posts JSON to an Azure Function (see /azure-function + DEPLOYMENT.md) instead
+// of the previous Web3Forms endpoint. Falls back to a mailto: link if no
+// endpoint has been configured yet (form's data-endpoint attribute is empty).
 (function () {
   const form = document.getElementById('contactForm');
   if (!form) return;
 
+  const ENDPOINT = (form.dataset.endpoint || '').trim();
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const btn = form.querySelector('button[type=submit]');
-    const action = form.getAttribute('action') || '';
 
-    // Fallback to mailto if formspree not configured
-    if (action.includes('your-form-id')) {
-      const name    = form.name?.value    || '';
-      const email   = form.email?.value   || '';
-      const company = form.company?.value || '';
-      const msg     = form.message?.value || '';
-      const sub = encodeURIComponent(`VNLOC Enquiry — ${name}${company ? ' / ' + company : ''}`);
-      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nCompany: ${company}\n\n${msg}`);
+    const name    = form.name?.value    || '';
+    const email   = form.email?.value   || '';
+    const company = form.company?.value || '';
+    const message = form.message?.value || '';
+    const website = form.website?.value || ''; // honeypot — should stay empty
+
+    // No Azure Function wired up yet — fall back to mailto
+    if (!ENDPOINT) {
+      const sub  = encodeURIComponent(`VNLOC Enquiry — ${name}${company ? ' / ' + company : ''}`);
+      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nCompany: ${company}\n\n${message}`);
       window.location.href = `mailto:vnloc@outlook.com?subject=${sub}&body=${body}`;
       return;
     }
@@ -153,13 +159,13 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     btn.disabled = true;
 
     try {
-      const res  = await fetch(action, {
+      const res = await fetch(ENDPOINT, {
         method: 'POST',
-        body: new FormData(form),
-        headers: { Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, company, message, website }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         btn.textContent = 'Message Sent ✓';
         btn.style.background = '#00A650';
         form.reset();
