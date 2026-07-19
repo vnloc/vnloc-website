@@ -294,16 +294,26 @@
             <div class="c-item"><span class="c-lbl">Location</span><span class="c-val">Perth, Western Australia</span></div>
           </div>
         </div>
-        <form id="contactForm" class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-          <input type="hidden" name="access_key" value="68c50bd2-da4b-4994-b624-fb3b0cb1447e" />
-          <input type="hidden" name="subject" value="New Enquiry — VNLOC Website" />
-          <input type="hidden" name="redirect" value="false" />
+        <!--
+          data-endpoint: relative path works once the site is hosted on Azure
+          Static Web Apps with azure-function/ wired up as the managed API
+          (see AZURE-HOSTING-MIGRATION.md) — same origin, no CORS needed.
+          If still on GitHub Pages with a standalone Function App instead
+          (see DEPLOYMENT.md), replace with the full Function App URL, e.g.
+          https://vnloc-contact-func.azurewebsites.net/api/contact
+        -->
+        <form id="contactForm" class="contact-form" data-endpoint="/api/contact">
           <div class="f-row">
             <div class="f-group"><label>Name</label><input type="text" name="name" placeholder="Your name" required /></div>
             <div class="f-group"><label>Email</label><input type="email" name="email" placeholder="your@email.com" required /></div>
           </div>
           <div class="f-group"><label>Company</label><input type="text" name="company" placeholder="Your company" /></div>
           <div class="f-group"><label>Message</label><textarea name="message" rows="4" placeholder="Tell us about your project..." required></textarea></div>
+          <!-- Honeypot: hidden from real users, bots tend to fill every field -->
+          <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+          </div>
           <button type="submit" class="btn-gold">Send Message →</button>
         </form>
       </div>

@@ -1,0 +1,17 @@
+{
+  "name": "vnloc-contact-function",
+  "version": "1.0.0",
+  "description": "Azure Function backend for the VNLOC website contact form (replaces Web3Forms)",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start",
+    "test:local": "curl -s -X POST http://localhost:7071/api/contact -H \"Content-Type: application/json\" -d \"{\\\"name\\\":\\\"Test\\\",\\\"email\\\":\\\"test@example.com\\\",\\\"company\\\":\\\"Acme\\\",\\\"message\\\":\\\"Hello\\\"}\""
+  },
+  "dependencies": {
+    "@azure/communication-email": "^1.0.0",
+    "@azure/functions": "^4.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
